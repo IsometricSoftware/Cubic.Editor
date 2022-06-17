@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubic.Editor", "Cubic.Editor\Cubic.Editor.csproj", "{2E9C680E-2A15-496C-B810-DB89CF0BACE8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubic", "..\Cubic\Cubic\Cubic.csproj", "{4035AB24-0555-45EA-AFB9-76B9096D602E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cubic.Editor.GameProject", "Cubic.Editor.GameProject\Cubic.Editor.GameProject.csproj", "{5B2983CF-6011-4477-B6FD-6C0B77F102B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2E9C680E-2A15-496C-B810-DB89CF0BACE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E9C680E-2A15-496C-B810-DB89CF0BACE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E9C680E-2A15-496C-B810-DB89CF0BACE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E9C680E-2A15-496C-B810-DB89CF0BACE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4035AB24-0555-45EA-AFB9-76B9096D602E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4035AB24-0555-45EA-AFB9-76B9096D602E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4035AB24-0555-45EA-AFB9-76B9096D602E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4035AB24-0555-45EA-AFB9-76B9096D602E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B2983CF-6011-4477-B6FD-6C0B77F102B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B2983CF-6011-4477-B6FD-6C0B77F102B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2983CF-6011-4477-B6FD-6C0B77F102B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B2983CF-6011-4477-B6FD-6C0B77F102B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
