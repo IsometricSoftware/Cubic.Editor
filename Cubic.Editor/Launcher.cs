@@ -1,4 +1,8 @@
+using System;
 using System.Drawing;
+using System.IO;
+using Cubic.Editor.DataStorage;
+using Cubic.Editor.Screens;
 using Cubic.GUI;
 using Cubic.Scenes;
 
@@ -13,9 +17,11 @@ public class Launcher : Scene
         View mainView = new View(Anchor.TopLeft, Graphics.Viewport);
 
         Button newButton = new Button(Anchor.TopRight, new Rectangle(-70, 10, 50, 30), "New", 18);
+        newButton.Click += () => OpenScreen("FileExplorerNew");
         mainView.AddElement("NewButton", newButton);
         
         Button openButton = new Button(Anchor.TopRight, new Rectangle(-10, 10, 50, 30), "Open", 18);
+        openButton.Click += () => OpenScreen("FileExplorerLoad");
         mainView.AddElement("OpenButton", openButton);
 
         Label welcomeLabel = new Label(Anchor.TopLeft, new Point(10, 14), "Welcome to Cubic Editor");
@@ -26,6 +32,27 @@ public class Launcher : Scene
 
         mainView.AddElement("FilesView", filesView);
         UI.AddElement("MainView", mainView);
+
+        FileExplorer feLoader = new FileExplorer(FileExplorer.ExplorerType.Open);
+        feLoader.Load += FileExplorerLoad;
+        AddScreen(feLoader, "FileExplorerLoad");
+        FileExplorer feNew = new FileExplorer(FileExplorer.ExplorerType.Save);
+        feNew.Load += FileExplorerNew;
+        AddScreen(feNew, "FileExplorerNew");
+    }
+
+    private void FileExplorerNew(string path)
+    {
+        Data.CreateProject(path);
+        SceneManager.SetScene("Editor");
+    }
+
+    private void FileExplorerLoad(string path)
+    {
+        if (!File.Exists(Path.Combine(path, "Project.cbproj")))
+            Console.WriteLine("NEIN");
+        Data.LoadProject(path);
+        SceneManager.SetScene("Editor");
     }
 
     protected override void Update()

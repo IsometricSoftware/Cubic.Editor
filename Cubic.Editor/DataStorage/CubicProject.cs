@@ -16,7 +16,7 @@ public struct CubicProject
     {
         Version = 1;
         ProjectName = projectName;
-        CodePath = "Generated";
+        CodePath = "Project";
         Scenes = new Dictionary<string, SerializableScene>();
     }
 }

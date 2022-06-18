@@ -7,9 +7,10 @@ GameSettings settings = new GameSettings()
 {
     Title = "Cubic Editor - Launcher",
     Size = new Size(500, 500),
-    Resizable = true
+    Resizable = false
 };
 
 using CubicGame game = new CubicGame(settings);
 SceneManager.RegisterScene<Launcher>("Launcher");
+SceneManager.RegisterScene<Editor>("Editor");
 game.Run();
