@@ -1,3 +1,4 @@
+using System;
 using System.Drawing;
 using System.Linq;
 using Cubic.Content.Serialization;
@@ -8,6 +9,7 @@ using Cubic.Entities.Components;
 using Cubic.Render;
 using Cubic.Scenes;
 using ImGuiNET;
+using Newtonsoft.Json;
 
 namespace Cubic.Editor;
 
@@ -39,20 +41,6 @@ public class Editor : Scene
     {
         base.Initialize();
         
-        // TODO: These screens have fixed sizes - try to fix the docking of imgui.net at some point
-        AddScreen(new SceneView(), "Scene");
-        AddScreen(new EntitiesView(), "Entities");
-        AddScreen(new EntityView(), "Entity");
-        AddScreen(new AssetsView(), "Assets");
-        AddScreen(new ViewportView(), "Viewport");
-        AddScreen(new MenuBarScreen(), "MenuBar");
-        OpenScreen("Scene");
-        OpenScreen("Entities");
-        OpenScreen("Entity");
-        OpenScreen("Assets");
-        OpenScreen("Viewport");
-        OpenScreen("MenuBar");
-
         (string name, ActiveScene) = Data.LoadedProject.Scenes.ElementAt(0);
         
         Game.Window.Size = new Size(1280, 720);
@@ -69,14 +57,43 @@ public class Editor : Scene
         
         foreach ((string eName, SerializableEntity entity) in ActiveScene.Entities)
             AddEntity(eName, new Entity(entity));
+        
+        // TODO: These screens have fixed sizes - try to fix the docking of imgui.net at some point
+        AddScreen(new SceneView(), "Scene");
+        AddScreen(new EntitiesView(), "Entities");
+        AddScreen(new EntityView(), "Entity");
+        AddScreen(new AssetsView(), "Assets");
+        AddScreen(new ViewportView(), "Viewport");
+        AddScreen(new MenuBarScreen(), "MenuBar");
+        AddScreen(new GameSettingsScreen(), "GameSettings");
+        OpenScreen("Scene");
+        OpenScreen("Entities");
+        OpenScreen("Entity");
+        OpenScreen("Assets");
+        OpenScreen("Viewport");
+        OpenScreen("MenuBar");
     }
 
     protected override void Update()
     {
         Game.ImGui.SetFont("Roboto");
         World.SampleType = ActiveScene.World.SampleType;
-        
+
         base.Update();
+
+        MouseCursor cursor = ImGui.GetMouseCursor() switch
+        {
+            ImGuiMouseCursor.TextInput => MouseCursor.IBeam,
+            ImGuiMouseCursor.ResizeAll => MouseCursor.Crosshair,
+            ImGuiMouseCursor.ResizeNS => MouseCursor.HorizontalResize,
+            ImGuiMouseCursor.ResizeEW => MouseCursor.VerticalResize,
+            ImGuiMouseCursor.ResizeNESW => MouseCursor.HorizontalResize,
+            ImGuiMouseCursor.ResizeNWSE => MouseCursor.VerticalResize,
+            ImGuiMouseCursor.Hand => MouseCursor.Hand,
+            _ => MouseCursor.Normal
+        };
+        
+        Input.SetMouseCursor(cursor);
     }
 
     protected override void Draw()
@@ -94,5 +111,29 @@ public class Editor : Scene
         ActiveScene.Entities.Add(name, entity);
         
         AddEntity(name, new Entity(entity));
+    }
+
+    public void RenameEntity(string originalName, string newName)
+    {
+        SerializableEntity entity = ActiveScene.Entities[originalName];
+        entity.Name = newName;
+        ActiveScene.Entities.Remove(originalName);
+        ActiveScene.Entities.Add(newName, entity);
+        RemoveEntity(originalName);
+        AddEntity(newName, new Entity(entity));
+        CurrentEntity = entity;
+    }
+
+    public void Duplicate(string name)
+    {
+        SerializableEntity entity = Data.DeserializeObject<SerializableEntity>(Data.SerializeObject(ActiveScene.Entities[name]));
+
+        do
+        {
+            entity.Name += " (1)";
+        } while (ActiveScene.Entities.ContainsKey(entity.Name));
+
+        ActiveScene.Entities.Add(entity.Name, entity);
+        AddEntity(entity.Name, new Entity(entity));
     }
 }

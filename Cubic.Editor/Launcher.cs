@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using Cubic.Editor.DataStorage;
 using Cubic.Editor.Screens;
 using Cubic.GUI;
@@ -28,7 +30,29 @@ public class Launcher : Scene
         mainView.AddElement("WelcomeLabel", welcomeLabel);
 
         View filesView = new View(Anchor.Center, new Rectangle(0, 0, 450, 300));
-        filesView.AddElement("temp", new Label(Anchor.Center, Point.Empty, "Recent files will go here..."));
+        int y = 0;
+        List<string> toRemove = null;
+        foreach ((string path, _) in Data.EditorConfig.PreviousFiles.OrderByDescending(p => p.Value))
+        {
+            if (!Directory.Exists(path))
+            {
+                if (toRemove == null)
+                    toRemove = new List<string>();
+                toRemove.Add(path);
+                continue;
+            }
+            Button b = new Button(Anchor.TopLeft, new Rectangle(0, y, 450, 30), new DirectoryInfo(path).Name);
+            b.Click += () => FileExplorerLoad(path);
+            filesView.AddElement(path, b);
+            y += 35;
+        }
+
+        if (toRemove != null)
+        {
+            foreach (string path in toRemove)
+                Data.EditorConfig.PreviousFiles.Remove(path);
+            Data.SaveEditorConfig();
+        }
 
         mainView.AddElement("FilesView", filesView);
         UI.AddElement("MainView", mainView);
@@ -44,15 +68,19 @@ public class Launcher : Scene
     private void FileExplorerNew(string path)
     {
         Data.CreateProject(path);
-        SceneManager.SetScene("Editor");
+        if (!Data.EditorConfig.PreviousFiles.TryAdd(path, DateTime.Now))
+            Data.EditorConfig.PreviousFiles[path] = DateTime.Now;
+        SetScene("Editor");
     }
 
     private void FileExplorerLoad(string path)
     {
         if (!File.Exists(Path.Combine(path, "Project.cbproj")))
-            Console.WriteLine("NEIN");
+            Console.WriteLine("project doesn't exist");
+        if (!Data.EditorConfig.PreviousFiles.TryAdd(path, DateTime.Now))
+            Data.EditorConfig.PreviousFiles[path] = DateTime.Now;
         Data.LoadProject(path);
-        SceneManager.SetScene("Editor");
+        SetScene("Editor");
     }
 
     protected override void Update()
@@ -60,5 +88,13 @@ public class Launcher : Scene
         base.Update();
 
         UI.GetElement<View>("MainView").Position = Graphics.Viewport;
+    }
+
+    private void SetScene(string name)
+    {
+        Data.EditorConfig.LauncherLocation = Game.Window.Location;
+        Data.EditorConfig.LauncherSize = Game.Window.Size;
+        Data.SaveEditorConfig();
+        SceneManager.SetScene(name);
     }
 }

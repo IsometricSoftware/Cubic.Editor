@@ -25,7 +25,14 @@ public class MenuBarScreen : Screen
                 ImGui.EndMenu();
             }
 
-            if (ImGui.MenuItem("Run", "", Data.ProjectRunning))
+            if (ImGui.BeginMenu("Game"))
+            {
+                if (ImGui.MenuItem("Settings"))
+                    CurrentScene.OpenScreen("GameSettings");
+                ImGui.EndMenu();
+            }
+
+            if (ImGui.MenuItem("Run", "", Data.ProjectRunning, !Data.ProjectRunning))
             {
                 Data.RunProject();
             }

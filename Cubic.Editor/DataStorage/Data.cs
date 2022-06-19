@@ -15,6 +15,8 @@ namespace Cubic.Editor.DataStorage;
 
 public static class Data
 {
+    public static EditorConfig EditorConfig;
+    
     public static bool ProjectRunning { get; private set; }
     
     public static CubicProject LoadedProject { get; private set; }
@@ -22,6 +24,29 @@ public static class Data
     public static string ProjectPath { get; private set; }
 
     public const string FileProject = "Project.cbproj";
+
+    public static void GetEditorConfig()
+    {
+        string fullPath = Path.Combine("Data", "config.cfg");
+
+        if (!File.Exists(fullPath))
+        {
+            EditorConfig = new EditorConfig();
+            SaveEditorConfig();
+            return;
+        }
+
+        EditorConfig = DeserializeObject<EditorConfig>(File.ReadAllText(fullPath));
+    }
+
+    public static void SaveEditorConfig()
+    {
+        string fullPath = Path.Combine("Data", "config.cfg");
+        if (!Directory.Exists(Path.GetDirectoryName(fullPath)))
+            Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
+        
+        File.WriteAllText(fullPath, SerializeObject(EditorConfig));
+    }
 
     public static void CreateProject(string dirPath)
     {
@@ -78,10 +103,7 @@ public static class Data
         Game game = new Game()
         {
             Scenes = scenes,
-            GameSettings = new GameSettings()
-            {
-                Title = LoadedProject.ProjectName
-            },
+            GameSettings = LoadedProject.GameSettings.ToGameSettings(),
             Name = LoadedProject.ProjectName
         };
 

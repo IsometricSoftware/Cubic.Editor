@@ -15,24 +15,42 @@ namespace Cubic.Editor.Screens;
 
 public class EntityView : Screen
 {
+    private string _entityName;
+    private string _lastEntityName;
+    
     protected override void Initialize()
     {
         base.Initialize();
+
+        _entityName = null;
+        _lastEntityName = "";
     }
 
     protected override void Update()
     {
         base.Update();
-
+        
         SerializableEntity? entity = ((Editor) CurrentScene).CurrentEntity;
         
         float height = MenuBarScreen.Height;
-        ImGui.SetNextWindowPos(new Vector2(1030, height));
-        ImGui.SetNextWindowSize(new Vector2(250, 720 - height));
-        if (ImGui.Begin("Entity", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse))
+        ImGui.SetNextWindowPos(new Vector2(Graphics.Viewport.Width - 250, height));
+        ImGui.SetNextWindowSize(new Vector2(250, Graphics.Viewport.Height - height));
+        if (ImGui.Begin("Entity", ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoBringToFrontOnFocus))
         {
             if (entity.HasValue)
             {
+                if (_lastEntityName != entity.Value.Name)
+                {
+                    _lastEntityName = entity.Value.Name;
+                    _entityName = _lastEntityName;
+                }
+
+                if (ImGui.InputText("Name", ref _entityName, 50, ImGuiInputTextFlags.EnterReturnsTrue))
+                {
+                    ((Editor) CurrentScene).RenameEntity(_lastEntityName, _entityName);
+                    ((Editor) CurrentScene).ChangesMade = true;
+                }
+
                 if (ImGui.CollapsingHeader("Transform"))
                 {
                     if (ShowObject(entity.Value.Transform, false))
@@ -66,7 +84,8 @@ public class EntityView : Screen
                 char c = fieldName[i];
                 if (char.IsUpper(c) && i != 0)
                 {
-                    fieldName = fieldName.Insert(i, " ");
+                    fieldName = fieldName.Remove(i, 1);
+                    fieldName = fieldName.Insert(i, $" {char.ToLower(c)}");
                     i++;
                 }
             }
@@ -80,9 +99,32 @@ public class EntityView : Screen
                     if (ImGui.Checkbox(fieldName, ref value))
                         edited = SetValue(fi, obj, value);
                     break;
+                case int value:
+                    if (ImGui.DragInt(fieldName, ref value, speed))
+                        edited = SetValue(fi, obj, value);
+                    break;
+                case uint value:
+                    int v = (int) value;
+                    if (ImGui.DragInt(fieldName, ref v, speed, 0))
+                        edited = SetValue(fi, obj, (uint) v);
+                    break;
                 case float value:
                     if (ImGui.DragFloat(fieldName, ref value, speed))
                         edited = SetValue(fi, obj, value);
+                    break;
+                case string value:
+                    if (ImGui.InputText(fieldName, ref value, 3000))
+                        edited = SetValue(fi, obj, value);
+                    break;
+                case Size value:
+                    FieldSize s = new FieldSize(value);
+                    if (ImGui.DragInt2(fieldName, ref s.Width, speed))
+                        edited = SetValue(fi, obj, new Size(s.Width, s.Height));
+                    break;
+                case Point value:
+                    FieldPoint p = new FieldPoint(value);
+                    if (ImGui.DragInt2(fieldName, ref p.X, speed))
+                        edited = SetValue(fi, obj, new Point(p.X, p.Y));
                     break;
                 case Vector2 value:
                     if (ImGui.DragFloat2(fieldName, ref value, speed))
@@ -146,10 +188,10 @@ public class EntityView : Screen
                     break;
                 default:
                     //ImGui.Text(fieldName);
-                    if (ImGui.BeginMenu(fieldName))
+                    if (ImGui.CollapsingHeader(fieldName))
                     {
                         ShowObject(getObj);
-                        ImGui.EndMenu();
+                        ImGui.Spacing();
                     }
 
                     break;
@@ -190,5 +232,29 @@ public class EntityView : Screen
         }
 
         return null;
+    }
+
+    private ref struct FieldSize
+    {
+        public int Width;
+        public int Height;
+
+        public FieldSize(Size size)
+        {
+            Width = size.Width;
+            Height = size.Height;
+        }
+    }
+    
+    private ref struct FieldPoint
+    {
+        public int X;
+        public int Y;
+
+        public FieldPoint(Point point)
+        {
+            X = point.X;
+            Y = point.Y;
+        }
     }
 }

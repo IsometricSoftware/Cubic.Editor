@@ -1,13 +1,17 @@
 ﻿using System.Drawing;
 using Cubic.Editor;
+using Cubic.Editor.DataStorage;
 using Cubic.Scenes;
 using Cubic.Windowing;
+
+Data.GetEditorConfig();
 
 GameSettings settings = new GameSettings()
 {
     Title = "Cubic Editor - Launcher",
-    Size = new Size(500, 500),
-    Resizable = false
+    Size = Data.EditorConfig.LauncherSize,
+    Location = Data.EditorConfig.LauncherLocation,
+    Resizable = true
 };
 
 using CubicGame game = new CubicGame(settings);
