@@ -41,10 +41,10 @@ public class Launcher : Scene
                 toRemove.Add(path);
                 continue;
             }
-            Button b = new Button(Anchor.TopLeft, new Rectangle(0, y, 450, 30), new DirectoryInfo(path).Name);
+            Button b = new Button(Anchor.TopLeft, new Rectangle(0, y, 450, 30), new DirectoryInfo(path).Name, 18);
             b.Click += () => FileExplorerLoad(path);
             filesView.AddElement(path, b);
-            y += 35;
+            y += b.Position.Height - b.Theme.BorderWidth;
         }
 
         if (toRemove != null)

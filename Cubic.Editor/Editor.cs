@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Numerics;
 using Cubic.Content.Serialization;
 using Cubic.Editor.DataStorage;
 using Cubic.Editor.Screens;
@@ -8,6 +9,7 @@ using Cubic.Entities;
 using Cubic.Entities.Components;
 using Cubic.Render;
 using Cubic.Scenes;
+using Cubic.Utilities;
 using ImGuiNET;
 using Newtonsoft.Json;
 
@@ -101,6 +103,18 @@ public class Editor : Scene
         Graphics.SetRenderTarget(Viewport);
         Graphics.Clear(ActiveScene.World.ClearColor);
         base.Draw();
+        if (CurrentEntity.HasValue)
+        {
+            Graphics.SpriteRenderer.Begin(Camera2D.Main.TransformMatrix);
+            Entity entity = GetEntity(CurrentEntity.Value.Name);
+            Sprite sprite = entity.GetComponent<Sprite>();
+            const int borderWidth = 5;
+            Graphics.SpriteRenderer.DrawBorder(entity.Transform.Position.ToVector2() - new Vector2(borderWidth),
+                entity.Transform.Scale.ToVector2() * sprite.SpriteTexture.Size.ToVector2() +
+                new Vector2(borderWidth * 2), borderWidth, Color.White, entity.Transform.SpriteRotation, entity.Transform.Origin);
+            Graphics.SpriteRenderer.End();
+        }
+
         Graphics.SetRenderTarget(null);
     }
 
@@ -128,11 +142,14 @@ public class Editor : Scene
     {
         SerializableEntity entity = Data.DeserializeObject<SerializableEntity>(Data.SerializeObject(ActiveScene.Entities[name]));
 
+        int i = 0;
+        string entName;
         do
         {
-            entity.Name += " (1)";
-        } while (ActiveScene.Entities.ContainsKey(entity.Name));
+            entName = entity.Name + $" ({++i})";
+        } while (ActiveScene.Entities.ContainsKey(entName));
 
+        entity.Name = entName;
         ActiveScene.Entities.Add(entity.Name, entity);
         AddEntity(entity.Name, new Entity(entity));
     }

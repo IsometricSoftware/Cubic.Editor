@@ -39,6 +39,8 @@ public class ViewportView : Screen
 
             if (ImGui.IsItemHovered())
             {
+                Camera2D.Main.Transform.Scale += new Vector3(Input.ScrollWheelDelta.Y, Input.ScrollWheelDelta.Y, 0) * 0.1f;
+                
                 ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeAll);
                 if (Input.MouseButtonDown(MouseButtons.Left))
                 {
